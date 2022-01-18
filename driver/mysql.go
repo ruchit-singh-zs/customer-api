@@ -13,7 +13,7 @@ func ConnectToSQL() *sql.DB {
 		Passwd: "password",
 		Net:    "tcp",
 		Addr:   "127.0.0.1:3306",
-		DBName: "organization",
+		DBName: "organisation",
 	}
 
 	// get a database handle

@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/anushi/customer-api/handler"
+	"customer-api/handler"
+	"customer-api/middleware"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -21,15 +22,7 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	r.Use(SetContentType)
+	r.Use(middleware.SetContentType)
 
 	log.Fatal(srv.ListenAndServe())
-}
-
-func SetContentType(inner http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("content-type", "application/json")
-
-		inner.ServeHTTP(w, r)
-	})
 }

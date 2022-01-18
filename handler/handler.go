@@ -9,8 +9,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/anushi/customer-api/driver"
-	"github.com/anushi/customer-api/model"
+	"customer-api/driver"
+	"customer-api/model"
 )
 
 func GetByID(w http.ResponseWriter, r *http.Request) {
@@ -46,31 +46,25 @@ func GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func Post(w http.ResponseWriter, r *http.Request) {
+	var c model.Customer
 	db := driver.ConnectToSQL()
 	defer db.Close()
-
-	var c model.Customer
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+	}
+	err2 := json.Unmarshal(body, &c)
 
+	if err2 != nil {
 		return
 	}
 
-	err = json.Unmarshal(body, &c)
+	_, err = db.Exec("INSERT INTO Customer (ID,NAME , PHONENO, ADDRESS) VALUES (?,?, ?, ?)",
+		c.ID, c.Name, c.PhoneNo, c.Address)
+
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-
-		return
+		log.Printf("Error in Inserting: %v", err)
 	}
-
-	_, err = db.Exec("INSERT INTO Customer (ID, NAME , PHONENO, ADDRESS) VALUES (?, ?, ?, ?)", c.ID, c.Name, c.PhoneNo, c.Address)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
+	log.Println(c)
 }
