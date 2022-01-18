@@ -45,7 +45,7 @@ func GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Post(w http.ResponseWriter, r *http.Request) {
+func Create(w http.ResponseWriter, r *http.Request) {
 	var c model.Customer
 	db := driver.ConnectToSQL()
 	defer db.Close()
@@ -54,9 +54,9 @@ func Post(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	err2 := json.Unmarshal(body, &c)
 
-	if err2 != nil {
+	error := json.Unmarshal(body, &c)
+	if error != nil {
 		return
 	}
 
@@ -67,4 +67,23 @@ func Post(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error in Inserting: %v", err)
 	}
 	log.Println(c)
+}
+
+func DeleteByID(w http.ResponseWriter, r *http.Request) {
+	db := driver.ConnectToSQL()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			return
+		}
+	}(db)
+
+	params := mux.Vars(r)
+	id := params["id"]
+
+	_, err := db.Exec("DELETE FROM Customer WHERE ID =?", id)
+	if err != nil {
+		log.Println("Error in deleting", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
