@@ -1,4 +1,4 @@
-package model
+package models
 
 type Customer struct {
 	ID      int64  `json:"customer_id"`
