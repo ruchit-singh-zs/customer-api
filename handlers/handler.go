@@ -15,9 +15,7 @@ import (
 
 func GetByID(w http.ResponseWriter, r *http.Request) {
 	db := drivers.ConnectToSQL()
-	defer func(db *sql.DB) {
-		_ = db.Close()
-	}(db)
+	defer db.Close()
 
 	params := mux.Vars(r)
 	id := params["id"]
@@ -30,6 +28,10 @@ func GetByID(w http.ResponseWriter, r *http.Request) {
 	switch err {
 	case sql.ErrNoRows:
 		w.WriteHeader(http.StatusNotFound)
+		_, err = w.Write([]byte("No Record Exists"))
+		if err != nil {
+			return
+		}
 	case nil:
 		resp, err := json.Marshal(customer)
 		if err != nil {
@@ -50,12 +52,7 @@ func GetByID(w http.ResponseWriter, r *http.Request) {
 func Create(w http.ResponseWriter, r *http.Request) {
 	var c models.Customer
 	db := drivers.ConnectToSQL()
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
-
-		}
-	}(db)
+	defer db.Close()
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -74,17 +71,15 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error in Inserting: %v", err)
 	}
 	log.Println(c)
+	_, err = w.Write([]byte("Succesfully created"))
+	if err != nil {
+		return
+	}
 }
 
 func DeleteByID(w http.ResponseWriter, r *http.Request) {
 	db := drivers.ConnectToSQL()
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
-
-		}
-	}(db)
-
+	defer db.Close()
 	params := mux.Vars(r)
 	id := params["id"]
 
@@ -102,12 +97,7 @@ func DeleteByID(w http.ResponseWriter, r *http.Request) {
 func UpdateByID(w http.ResponseWriter, r *http.Request) {
 	var c models.Customer
 	db := drivers.ConnectToSQL()
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
-
-		}
-	}(db)
+	defer db.Close()
 
 	params := mux.Vars(r)
 	id := params["id"]
@@ -132,6 +122,4 @@ func UpdateByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	log.Println(c)
-
 }
