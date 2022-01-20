@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func ConnectToSQL() *sql.DB {
+func ConnectToSQL() (*sql.DB, error) {
 	// capture connection properties
 	cfg := mysql.Config{
 		User:   "root",
@@ -19,14 +19,14 @@ func ConnectToSQL() *sql.DB {
 	// get a database handle
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
-		log.Fatal(err)
+		return db, err
 	}
 
 	if err := db.Ping(); err != nil {
-		log.Fatal(err)
+		return db, err
 	}
 
 	log.Println("Connected!")
 
-	return db
+	return db, nil
 }

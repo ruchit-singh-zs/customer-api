@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"io"
 	"log"
@@ -10,27 +9,39 @@ import (
 	"github.com/gorilla/mux"
 
 	"customer-api/drivers"
+	"customer-api/errors"
 	"customer-api/models"
+	"customer-api/stores"
 )
 
-func GetByID(w http.ResponseWriter, r *http.Request) {
-	db := drivers.ConnectToSQL()
-	defer db.Close()
+type Handler struct {
+	store stores.Customer
+}
+
+func New(s stores.Customer) Handler {
+	return Handler{store: s}
+}
+
+func (h Handler) GetByID(w http.ResponseWriter, r *http.Request) {
+	//db := drivers.ConnectToSQL()
+	//defer db.Close()
 
 	params := mux.Vars(r)
 	id := params["id"]
 
 	var customer models.Customer
+	//
+	//err := db.QueryRow("SELECT * FROM Customer WHERE ID = ?", id).
+	//	Scan(&customer.ID, &customer.Name, &customer.PhoneNo, &customer.Address)
 
-	err := db.QueryRow("SELECT * FROM Customer WHERE ID = ?", id).
-		Scan(&customer.ID, &customer.Name, &customer.PhoneNo, &customer.Address)
+	customer, err := h.store.GetCustomer(id)
 
-	switch err {
-	case sql.ErrNoRows:
+	switch err.(type) {
+	case errors.EntityNotFound:
 		w.WriteHeader(http.StatusNotFound)
 		_, err = w.Write([]byte("No Record Exists"))
 		if err != nil {
-			return
+			log.Println("Http reply not working")
 		}
 	case nil:
 		resp, err := json.Marshal(customer)
@@ -50,8 +61,10 @@ func GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
-	var c models.Customer
-	db := drivers.ConnectToSQL()
+	db, err := drivers.ConnectToSQL()
+	if err != nil {
+		log.Println("Connection Failed")
+	}
 	defer db.Close()
 
 	body, err := io.ReadAll(r.Body)
@@ -59,9 +72,11 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
+	var c models.Customer
 	error := json.Unmarshal(body, &c)
 	if error != nil {
-		return
+		log.Println("Cannot encode the data")
+		w.WriteHeader(http.StatusBadRequest)
 	}
 
 	_, err = db.Exec("INSERT INTO Customer (ID,NAME , PHONENO, ADDRESS) VALUES (?,?, ?, ?)",
@@ -69,34 +84,43 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Printf("Error in Inserting: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 	log.Println(c)
 	_, err = w.Write([]byte("Succesfully created"))
 	if err != nil {
-		return
+		log.Println("HTTP Reply not working")
 	}
 }
 
 func DeleteByID(w http.ResponseWriter, r *http.Request) {
-	db := drivers.ConnectToSQL()
+	db, err := drivers.ConnectToSQL()
+	if err != nil {
+		log.Println("Connection lost")
+	}
 	defer db.Close()
+
 	params := mux.Vars(r)
 	id := params["id"]
 
-	_, err := db.Exec("DELETE FROM Customer WHERE ID =?", id)
+	_, err = db.Exec("DELETE FROM Customer WHERE ID =?", id)
 	if err != nil {
 		log.Println("Error in deleting", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	_, err = w.Write([]byte("Deleted Successfully"))
 	if err != nil {
+		//w.WriteHeader(http.StatusNoContent)
 		return
 	}
 }
 
 func UpdateByID(w http.ResponseWriter, r *http.Request) {
-	var c models.Customer
-	db := drivers.ConnectToSQL()
+	db, err := drivers.ConnectToSQL()
+	if err != nil {
+		log.Println("Connection lost")
+	}
 	defer db.Close()
 
 	params := mux.Vars(r)
@@ -104,10 +128,13 @@ func UpdateByID(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
+	var c models.Customer
 	error := json.Unmarshal(body, &c)
 	if error != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -116,6 +143,7 @@ func UpdateByID(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Printf("Error in Updating: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	_, err = w.Write([]byte("Updated Successfully"))
