@@ -1,7 +1,7 @@
 package main
 
 import (
-	"customer-api/handlers"
+	"customer-api/handlers/customer"
 	"customer-api/middleware"
 	"log"
 	"net/http"
@@ -12,10 +12,10 @@ import (
 func main() {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/customer/{id}", handlers.GetByID).Methods(http.MethodGet)
-	r.HandleFunc("/customer", handlers.Create).Methods(http.MethodPost)
-	r.HandleFunc("/customer/delete/{id}", handlers.DeleteByID).Methods(http.MethodDelete)
-	r.HandleFunc("/customer/update/{id}", handlers.UpdateByID).Methods(http.MethodPut)
+	r.HandleFunc("/customer/{id}", customer.GetByID).Methods(http.MethodGet)
+	r.HandleFunc("/customer", customer.Create).Methods(http.MethodPost)
+	r.HandleFunc("/customer/delete/{id}", customer.DeleteByID).Methods(http.MethodDelete)
+	r.HandleFunc("/customer/update/{id}", customer.UpdateByID).Methods(http.MethodPut)
 
 	r.Use(middleware.SetContentType)
 
