@@ -2,8 +2,9 @@ package drivers
 
 import (
 	"database/sql"
-	"github.com/go-sql-driver/mysql"
 	"log"
+
+	"github.com/go-sql-driver/mysql"
 )
 
 func ConnectToSQL() (*sql.DB, error) {
