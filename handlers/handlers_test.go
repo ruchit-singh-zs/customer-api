@@ -2,12 +2,11 @@ package handlers
 
 import (
 	"bytes"
+	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
-
-	"github.com/gorilla/mux"
 )
 
 func TestCreate(t *testing.T) {
@@ -18,7 +17,7 @@ func TestCreate(t *testing.T) {
 		expectedStatusCode int
 		expectedResponse   string
 	}{
-		{"customer created Succesfully", "7", []byte(`{"customerId":7,"name":"Rahul S","phoneNo":"9909111122","address":"BG Road Bangalore"}`), http.StatusOK, "Succesfully created"},
+		{"customer created Succesfully", "7", []byte(`{"id":7,"name":"Shreya S","phoneNo":"9909111122","address":"BG Road Bangalore"}`), http.StatusOK, "Succesfully created"},
 	}
 	for x, v := range testcases {
 		req := httptest.NewRequest(http.MethodPost, "http://customer", bytes.NewReader(v.body))
@@ -30,12 +29,12 @@ func TestCreate(t *testing.T) {
 		resp := w.Result()
 
 		if resp.StatusCode != v.expectedStatusCode {
-			t.Errorf("Test[%v] Failed \nExpected: %v \tGot %v", x, v.expectedStatusCode, w.Code)
+			t.Errorf("Test[%v] Failed\n desc: %v\nExpected: %v \tGot: %v", x, v.desc, v.expectedStatusCode, w.Code)
 		}
 
 		expected := bytes.NewBuffer([]byte(v.expectedResponse))
 		if !reflect.DeepEqual(w.Body, expected) {
-			t.Errorf("Test[%v] Failed\n tExpected: %v \tGot: %v", x, expected.String(), w.Body.String())
+			t.Errorf("Test[%v] Failed\n desc: %v\nExpected: %v \tGot: %v", x, v.desc, expected.String(), w.Body.String())
 		}
 	}
 }
@@ -48,7 +47,7 @@ func TestGetByID(t *testing.T) {
 		expectedStatusCode int
 		expectedResponse   string
 	}{
-		{"customer exists", "1", nil, http.StatusOK, `{"customerId":1,"name":"Ruchit S","phoneNo":"4523946525","address":"BLR"}`},
+		{"customer exists", "1", nil, http.StatusOK, `{"id":1,"name":"Ruchit S","phoneNo":"4523946525","address":"BLR"}`},
 		{"customer does not exists", "10", nil, http.StatusNotFound, "No Record Exists"},
 	}
 
@@ -62,12 +61,12 @@ func TestGetByID(t *testing.T) {
 		resp := w.Result()
 
 		if resp.StatusCode != v.expectedStatusCode {
-			t.Errorf("Test[%v] Failed \nExpected: %v \tGot %v", i, v.expectedStatusCode, w.Code)
+			t.Errorf("Test[%v] Failed desc: %v\nExpected: %v \tGot %v", i, v.desc, v.expectedStatusCode, w.Code)
 		}
 
 		expected := bytes.NewBuffer([]byte(v.expectedResponse))
 		if !reflect.DeepEqual(w.Body, expected) {
-			t.Errorf("Test[%v] Failed\n tExpected: %v \tGot: %v", i, expected.String(), w.Body.String())
+			t.Errorf("Test[%v] Failed\n desc: %v\n Expected: %v \tGot: %v", i, v.desc, expected.String(), w.Body.String())
 		}
 	}
 }
@@ -80,7 +79,7 @@ func TestUpdateByID(t *testing.T) {
 		expectedStatusCode int
 		expectedResponse   string
 	}{
-		{"customer updated successfully", "4", []byte(`{"customerId":4,"name":"Aakanksha J	","phoneNo":"9909111143","address":"HSR Bangalore"}`), http.StatusOK, "Updated Successfully"},
+		{"customer updated successfully", "7", []byte(`{"id":7,"name":"Divya S","phoneNo":"9909111143","address":"HSR Bangalore"}`), http.StatusOK, "Updated Successfully"},
 	}
 	for i, v := range testcases {
 		req := httptest.NewRequest(http.MethodPut, "http://customer", bytes.NewReader(v.body))
@@ -92,7 +91,7 @@ func TestUpdateByID(t *testing.T) {
 		resp := w.Result()
 
 		if resp.StatusCode != v.expectedStatusCode {
-			t.Errorf("Test[%v] Failed \nExpected: %v \tGot %v", i, v.expectedStatusCode, w.Code)
+			t.Errorf("Test[%v] Failed \ndesc: %v \nExpected: %v \tGot: %v", v.desc, i, v.expectedStatusCode, w.Code)
 		}
 	}
 }
@@ -105,7 +104,7 @@ func TestDeleteByID(t *testing.T) {
 		expectedStatusCode int
 		expectedResponse   string
 	}{
-		{"customer deleted succesfully", "6", nil, http.StatusOK, "Deleted Successfully"},
+		{"customer deleted succesfully", "7", nil, http.StatusOK, "Deleted Successfully"},
 		{"customer record doesn't exist", "16", nil, http.StatusOK, "Deleted Successfully"},
 	}
 
@@ -119,12 +118,12 @@ func TestDeleteByID(t *testing.T) {
 		resp := w.Result()
 
 		if resp.StatusCode != v.expectedStatusCode {
-			t.Errorf("Test[%v] Failed \nExpected: %v \tGot %v", i, v.expectedStatusCode, w.Code)
+			t.Errorf("Test[%v] Failed \ndesc: %v\nExpected: %v \tGot: %v", i, v.desc, v.expectedStatusCode, w.Code)
 		}
 
 		expected := bytes.NewBuffer([]byte(v.expectedResponse))
 		if !reflect.DeepEqual(w.Body, expected) {
-			t.Errorf("Test[%v] Failed\n tExpected: %v \tGot: %v", i, expected.String(), w.Body.String())
+			t.Errorf("Test[%v] Failed\n desc: %v\nExpected: %v \tGot: %v", i, v.desc, expected.String(), w.Body.String())
 		}
 	}
 }
