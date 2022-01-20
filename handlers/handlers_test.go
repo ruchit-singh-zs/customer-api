@@ -18,7 +18,7 @@ func TestCreate(t *testing.T) {
 		expectedStatusCode int
 		expectedResponse   string
 	}{
-		{"customer created Succesfully", "6", []byte(`{"customerId":6,"name":"Rahul","phoneNo":"9909111143","address":"BG Road Bangalore"}`), http.StatusOK, "Succesfully created"},
+		{"customer created Succesfully", "7", []byte(`{"customerId":7,"name":"Rahul S","phoneNo":"9909111122","address":"BG Road Bangalore"}`), http.StatusOK, "Succesfully created"},
 	}
 	for x, v := range testcases {
 		req := httptest.NewRequest(http.MethodPost, "http://customer", bytes.NewReader(v.body))
@@ -30,12 +30,12 @@ func TestCreate(t *testing.T) {
 		resp := w.Result()
 
 		if resp.StatusCode != v.expectedStatusCode {
-			t.Errorf("Test[%v] Failed\nDesc: %v\tExpected: %v \tGot %v", x, v.desc, v.expectedStatusCode, w.Code)
+			t.Errorf("Test[%v] Failed \nExpected: %v \tGot %v", x, v.expectedStatusCode, w.Code)
 		}
 
 		expected := bytes.NewBuffer([]byte(v.expectedResponse))
 		if !reflect.DeepEqual(w.Body, expected) {
-			t.Errorf("Test[%v] Failed\nDesc: %v\tExpected: %v \tGot: %v", x, v.desc, expected.String(), w.Body.String())
+			t.Errorf("Test[%v] Failed\n tExpected: %v \tGot: %v", x, expected.String(), w.Body.String())
 		}
 	}
 }
@@ -52,7 +52,7 @@ func TestGetByID(t *testing.T) {
 		{"customer does not exists", "10", nil, http.StatusNotFound, "No Record Exists"},
 	}
 
-	for _, v := range testcases {
+	for i, v := range testcases {
 		req := httptest.NewRequest(http.MethodGet, "http://customer", nil)
 		r := mux.SetURLVars(req, map[string]string{"id": v.id})
 		w := httptest.NewRecorder()
@@ -62,12 +62,12 @@ func TestGetByID(t *testing.T) {
 		resp := w.Result()
 
 		if resp.StatusCode != v.expectedStatusCode {
-			t.Errorf("Expected %v\tGot %v", v.expectedStatusCode, w.Code)
+			t.Errorf("Test[%v] Failed \nExpected: %v \tGot %v", i, v.expectedStatusCode, w.Code)
 		}
 
 		expected := bytes.NewBuffer([]byte(v.expectedResponse))
 		if !reflect.DeepEqual(w.Body, expected) {
-			t.Errorf("Expected %v\tGot %v", expected.String(), w.Body.String())
+			t.Errorf("Test[%v] Failed\n tExpected: %v \tGot: %v", i, expected.String(), w.Body.String())
 		}
 	}
 }
@@ -82,7 +82,7 @@ func TestUpdateByID(t *testing.T) {
 	}{
 		{"customer updated successfully", "4", []byte(`{"customerId":4,"name":"Aakanksha J	","phoneNo":"9909111143","address":"HSR Bangalore"}`), http.StatusOK, "Updated Successfully"},
 	}
-	for _, v := range testcases {
+	for i, v := range testcases {
 		req := httptest.NewRequest(http.MethodPut, "http://customer", bytes.NewReader(v.body))
 		r := mux.SetURLVars(req, map[string]string{"id": v.id})
 		w := httptest.NewRecorder()
@@ -92,7 +92,7 @@ func TestUpdateByID(t *testing.T) {
 		resp := w.Result()
 
 		if resp.StatusCode != v.expectedStatusCode {
-			t.Errorf("Expected : %v\tGot : %v", v.expectedStatusCode, w.Code)
+			t.Errorf("Test[%v] Failed \nExpected: %v \tGot %v", i, v.expectedStatusCode, w.Code)
 		}
 	}
 }
@@ -109,7 +109,7 @@ func TestDeleteByID(t *testing.T) {
 		{"customer record doesn't exist", "16", nil, http.StatusOK, "Deleted Successfully"},
 	}
 
-	for _, v := range testcases {
+	for i, v := range testcases {
 		req := httptest.NewRequest(http.MethodDelete, "http://customer", nil)
 		r := mux.SetURLVars(req, map[string]string{"id": v.id})
 		w := httptest.NewRecorder()
@@ -119,12 +119,12 @@ func TestDeleteByID(t *testing.T) {
 		resp := w.Result()
 
 		if resp.StatusCode != v.expectedStatusCode {
-			t.Errorf("Expected %v\tGot %v", v.expectedStatusCode, w.Code)
+			t.Errorf("Test[%v] Failed \nExpected: %v \tGot %v", i, v.expectedStatusCode, w.Code)
 		}
 
 		expected := bytes.NewBuffer([]byte(v.expectedResponse))
 		if !reflect.DeepEqual(w.Body, expected) {
-			t.Errorf("Expected %v\tGot %v", expected.String(), w.Body.String())
+			t.Errorf("Test[%v] Failed\n tExpected: %v \tGot: %v", i, expected.String(), w.Body.String())
 		}
 	}
 }
