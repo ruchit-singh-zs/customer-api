@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"io"
 	"log"
@@ -9,7 +10,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"customer-api/drivers"
-	"customer-api/errors"
 	"customer-api/models"
 	"customer-api/stores"
 )
@@ -23,26 +23,25 @@ func New(s stores.Customer) Handler {
 }
 
 func (h Handler) GetByID(w http.ResponseWriter, r *http.Request) {
-	//db := drivers.ConnectToSQL()
-	//defer db.Close()
+	db, err := drivers.ConnectToSQL()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
 
 	params := mux.Vars(r)
 	id := params["id"]
 
 	var customer models.Customer
-	//
-	//err := db.QueryRow("SELECT * FROM Customer WHERE ID = ?", id).
-	//	Scan(&customer.ID, &customer.Name, &customer.PhoneNo, &customer.Address)
+	err = db.QueryRow("SELECT * FROM Customer WHERE ID = ?", id).
+		Scan(&customer.ID, &customer.Name, &customer.PhoneNo, &customer.Address)
 
-	customer, err := h.store.GetCustomer(id)
-
-	switch err.(type) {
-	case errors.EntityNotFound:
+	//customer, err := h.store.GetCustomer(id)
+	switch err {
+	case sql.ErrNoRows:
 		w.WriteHeader(http.StatusNotFound)
-		_, err = w.Write([]byte("No Record Exists"))
-		if err != nil {
-			log.Println("Http reply not working")
-		}
+		w.Write([]byte("No Record Exists"))
 	case nil:
 		resp, err := json.Marshal(customer)
 		if err != nil {
