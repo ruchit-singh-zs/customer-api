@@ -19,11 +19,11 @@ func ConnectToSQL() (*sql.DB, error) {
 	// get a database handle
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
-		return db, err
+		return nil, err
 	}
 
 	if err := db.Ping(); err != nil {
-		return db, err
+		return nil, err
 	}
 
 	log.Println("Connected!")
