@@ -3,10 +3,10 @@ package main
 import (
 	"customer-api/handlers"
 	"customer-api/middleware"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -17,14 +17,10 @@ func main() {
 	r.HandleFunc("/customer/delete/{id}", handlers.DeleteByID).Methods(http.MethodDelete)
 	r.HandleFunc("/customer/update/{id}", handlers.UpdateByID).Methods(http.MethodPut)
 
-	srv := &http.Server{
-		Handler:      r,
-		Addr:         "127.0.0.1:8080",
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
-
 	r.Use(middleware.SetContentType)
 
-	log.Fatal(srv.ListenAndServe())
+	err := http.ListenAndServe(":8080", r)
+	if err != nil {
+		log.Println("Cant Connect!")
+	}
 }

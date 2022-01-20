@@ -2,24 +2,27 @@ package handlers
 
 import (
 	"bytes"
-	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"github.com/gorilla/mux"
 )
 
 func TestCreate(t *testing.T) {
-	testcases := []struct {
+	res := `"id":7,"name":"Shreya S","phoneNo":"9909111122","address":"BG Road Bangalore"}`
+	cases := []struct {
 		desc               string
 		id                 string
 		body               []byte
 		expectedStatusCode int
 		expectedResponse   string
 	}{
-		{"customer created Succesfully", "7", []byte(`{"id":7,"name":"Shreya S","phoneNo":"9909111122","address":"BG Road Bangalore"}`), http.StatusOK, "Succesfully created"},
+		{"customer created Successfully", "7", []byte(res), http.StatusOK, "successfully created"},
 	}
-	for x, v := range testcases {
+
+	for x, v := range cases {
 		req := httptest.NewRequest(http.MethodPost, "http://customer", bytes.NewReader(v.body))
 		r := mux.SetURLVars(req, map[string]string{"id": v.id})
 		w := httptest.NewRecorder()
@@ -27,6 +30,7 @@ func TestCreate(t *testing.T) {
 		Create(w, r)
 
 		resp := w.Result()
+		defer resp.Body.Close()
 
 		if resp.StatusCode != v.expectedStatusCode {
 			t.Errorf("Test[%v] Failed\n desc: %v\nExpected: %v \tGot: %v", x, v.desc, v.expectedStatusCode, w.Code)
@@ -40,7 +44,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestGetByID(t *testing.T) {
-	testcases := []struct {
+	cases := []struct {
 		desc               string
 		id                 string
 		body               []byte
@@ -51,7 +55,7 @@ func TestGetByID(t *testing.T) {
 		{"customer does not exists", "10", nil, http.StatusNotFound, "No Record Exists"},
 	}
 
-	for i, v := range testcases {
+	for i, v := range cases {
 		req := httptest.NewRequest(http.MethodGet, "http://customer", nil)
 		r := mux.SetURLVars(req, map[string]string{"id": v.id})
 		w := httptest.NewRecorder()
@@ -59,6 +63,7 @@ func TestGetByID(t *testing.T) {
 		GetByID(w, r)
 
 		resp := w.Result()
+		defer resp.Body.Close()
 
 		if resp.StatusCode != v.expectedStatusCode {
 			t.Errorf("Test[%v] Failed desc: %v\nExpected: %v \tGot %v", i, v.desc, v.expectedStatusCode, w.Code)
@@ -72,6 +77,7 @@ func TestGetByID(t *testing.T) {
 }
 
 func TestUpdateByID(t *testing.T) {
+	resp := `{"id":7,"name":"Divya S","phoneNo":"9909111143","address":"HSR Bangalore"}`
 	testcases := []struct {
 		desc               string
 		id                 string
@@ -79,8 +85,9 @@ func TestUpdateByID(t *testing.T) {
 		expectedStatusCode int
 		expectedResponse   string
 	}{
-		{"customer updated successfully", "7", []byte(`{"id":7,"name":"Divya S","phoneNo":"9909111143","address":"HSR Bangalore"}`), http.StatusOK, "Updated Successfully"},
+		{"customer updated successfully", "7", []byte(resp), http.StatusOK, "Updated Successfully"},
 	}
+
 	for i, v := range testcases {
 		req := httptest.NewRequest(http.MethodPut, "http://customer", bytes.NewReader(v.body))
 		r := mux.SetURLVars(req, map[string]string{"id": v.id})
@@ -89,6 +96,7 @@ func TestUpdateByID(t *testing.T) {
 		UpdateByID(w, r)
 
 		resp := w.Result()
+		defer resp.Body.Close()
 
 		if resp.StatusCode != v.expectedStatusCode {
 			t.Errorf("Test[%v] Failed \ndesc: %v \nExpected: %v \tGot: %v", v.desc, i, v.expectedStatusCode, w.Code)
@@ -97,18 +105,18 @@ func TestUpdateByID(t *testing.T) {
 }
 
 func TestDeleteByID(t *testing.T) {
-	testcases := []struct {
+	cases := []struct {
 		desc               string
 		id                 string
 		body               []byte
 		expectedStatusCode int
 		expectedResponse   string
 	}{
-		{"customer deleted succesfully", "7", nil, http.StatusOK, "Deleted Successfully"},
+		{"customer deleted successfully", "7", nil, http.StatusOK, "Deleted Successfully"},
 		{"customer record doesn't exist", "16", nil, http.StatusOK, "Deleted Successfully"},
 	}
 
-	for i, v := range testcases {
+	for i, v := range cases {
 		req := httptest.NewRequest(http.MethodDelete, "http://customer", nil)
 		r := mux.SetURLVars(req, map[string]string{"id": v.id})
 		w := httptest.NewRecorder()
@@ -116,6 +124,7 @@ func TestDeleteByID(t *testing.T) {
 		DeleteByID(w, r)
 
 		resp := w.Result()
+		defer resp.Body.Close()
 
 		if resp.StatusCode != v.expectedStatusCode {
 			t.Errorf("Test[%v] Failed \ndesc: %v\nExpected: %v \tGot: %v", i, v.desc, v.expectedStatusCode, w.Code)

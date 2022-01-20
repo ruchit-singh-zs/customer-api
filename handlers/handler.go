@@ -28,6 +28,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	var c models.Customer
 	err = json.Unmarshal(body, &c)
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -39,10 +40,11 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error in Inserting: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
+
 		return
 	}
 
-	_, err = w.Write([]byte("Succesfully created"))
+	_, err = w.Write([]byte("successfully created"))
 	if err != nil {
 		log.Println(err)
 	}
@@ -68,6 +70,7 @@ func GetByID(w http.ResponseWriter, r *http.Request) {
 	case sql.ErrNoRows:
 		w.WriteHeader(http.StatusNotFound)
 		_, err = w.Write([]byte("No Record Exists"))
+
 		if err != nil {
 			log.Println(err)
 		}
@@ -77,7 +80,9 @@ func GetByID(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
 		_, err = w.Write(resp)
+
 		if err != nil {
 			log.Println(err)
 		}
@@ -104,6 +109,7 @@ func UpdateByID(w http.ResponseWriter, r *http.Request) {
 
 	var c models.Customer
 	err = json.Unmarshal(body, &c)
+
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -115,6 +121,7 @@ func UpdateByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error in Updating: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
+
 		return
 	}
 
@@ -131,6 +138,7 @@ func DeleteByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer db.Close()
+
 	params := mux.Vars(r)
 	id := params["id"]
 
@@ -138,8 +146,10 @@ func DeleteByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("Error in deleting", err)
+
 		return
 	}
+
 	_, err = w.Write([]byte("Deleted Successfully"))
 	if err != nil {
 		w.WriteHeader(http.StatusNoContent)
