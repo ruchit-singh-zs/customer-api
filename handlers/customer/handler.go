@@ -27,16 +27,17 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var c models.Customer
-
 	err = json.Unmarshal(body, &c)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	_, err = db.Exec("INSERT INTO Customer (ID,NAME , PHONENO, ADDRESS) VALUES (?,?, ?, ?)",
+		&c.ID, &c.Name, &c.PhoneNo, &c.Address)
+
 	if err != nil {
-		log.Printf("Error in Inserting: %v", err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error in Inserting"))
 
 		return
 	}
@@ -116,6 +117,7 @@ func UpdateByID(w http.ResponseWriter, r *http.Request) {
 		&c.Name, &c.PhoneNo, &c.Address, id)
 
 	if err != nil {
+		w.Write([]byte("Cannot Update"))
 		log.Printf("Error in Updating: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 

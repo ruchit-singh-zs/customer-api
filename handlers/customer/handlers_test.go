@@ -2,32 +2,29 @@ package customer
 
 import (
 	"bytes"
+	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
-
-	"github.com/gorilla/mux"
 )
 
 func TestCreate(t *testing.T) {
-	res := `"id":7,"name":"Shreya S","phoneNo":"9909111122","address":"BG Road Bangalore"}`
 	cases := []struct {
 		desc               string
-		id                 string
 		body               []byte
 		expectedStatusCode int
 		expectedResponse   string
 	}{
-		{"customer created Successfully", "7", []byte(res), http.StatusOK, "successfully created"},
+		{"created Successfully", []byte(`{"id":9,"name":"ABC","phoneNo":"8809111122","address":"BG Road Bangalore"}`), http.StatusOK, "successfully created"},
+		{"customer already exists", []byte(`{"id":1,"name":"ABC","phoneNo":"8809111122","address":"BG Road Bangalore"}`), http.StatusOK, "Error in Inserting"},
 	}
 
 	for x, v := range cases {
 		req := httptest.NewRequest(http.MethodPost, "http://customer", bytes.NewReader(v.body))
-		r := mux.SetURLVars(req, map[string]string{"id": v.id})
 		w := httptest.NewRecorder()
 
-		Create(w, r)
+		Create(w, req)
 
 		resp := w.Result()
 		defer resp.Body.Close()
@@ -77,7 +74,7 @@ func TestGetByID(t *testing.T) {
 }
 
 func TestUpdateByID(t *testing.T) {
-	resp := `{"id":7,"name":"Divya S","phoneNo":"9909111143","address":"HSR Bangalore"}`
+	resp := `{"id":6,"name":"Divya S","phoneNo":"9909111143","address":"Shimla"}`
 	testcases := []struct {
 		desc               string
 		id                 string
@@ -86,6 +83,7 @@ func TestUpdateByID(t *testing.T) {
 		expectedResponse   string
 	}{
 		{"customer updated successfully", "7", []byte(resp), http.StatusOK, "Updated Successfully"},
+		{"customer doesn't exist", "10", []byte(resp), http.StatusOK, "Cannot Update"},
 	}
 
 	for i, v := range testcases {
