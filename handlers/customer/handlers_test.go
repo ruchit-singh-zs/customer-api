@@ -2,12 +2,16 @@ package customer
 
 import (
 	"bytes"
+
 	"customer-api/models"
+	"github.com/gorilla/mux"
+
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 )
+
 
 type mockService struct {
 }
