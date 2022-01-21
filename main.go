@@ -16,6 +16,7 @@ func main() {
 // 	r.HandleFunc("/customer/delete/{id}", customer.DeleteByID).Methods(http.MethodDelete)
 // 	r.HandleFunc("/customer/update/{id}", customer.UpdateByID).Methods(http.MethodPut)
 
+	
 	r.Use(middleware.SetContentType)
 
 	err := http.ListenAndServe(":8080", r)
