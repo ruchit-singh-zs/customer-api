@@ -11,7 +11,6 @@ import (
 
 func main() {
 	r := mux.NewRouter()
-
 	r.HandleFunc("/customer/{id}", customer.GetByID).Methods(http.MethodGet)
 	r.HandleFunc("/customer", customer.Create).Methods(http.MethodPost)
 	r.HandleFunc("/customer/delete/{id}", customer.DeleteByID).Methods(http.MethodDelete)
